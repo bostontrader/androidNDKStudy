@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    @author Thomas Radloff  bostontrader@gmail.com https://bostontrader.github.io/androidNDKStudy
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="spartacus.androidndkstudy" >
 

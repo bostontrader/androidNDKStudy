@@ -1,24 +1,26 @@
-apply plugin: 'com.android.application'
+//
+// author Thomas Radloff  bostontrader@gmail.com https://bostontrader.github.io/androidNDKStudy
+//
+// (1) http://tools.android.com/tech-docs/new-build-system/gradle-experimental
+apply plugin: 'com.android.model.application' // (1)
 
-android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+model {
+    android {
+        compileSdkVersion = 22
+        buildToolsVersion = "22.0.1"
 
-    defaultConfig {
-        applicationId "spartacus.androidndkstudy"
-        minSdkVersion 4
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        defaultConfig.with {
+            applicationId = "spartacus.androidndkstudy"
+            minSdkVersion.apiLevel = 4
+            targetSdkVersion.apiLevel = 4
+            versionCode = 1
+            versionName = "1.0"
         }
-    }
-}
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    }
+
+    android.ndk {
+        moduleName = "hello-tommy"
+    }
+
 }
