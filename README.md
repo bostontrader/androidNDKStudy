@@ -17,7 +17,7 @@ You'll need to also study the [Java Native Interface (JNI)]
 (http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html) and the
 [Android Native Development Kit (NDK)](http://developer.android.com/ndk/guides/index.html).
 JNI is Java's spec for how Java should interact
-with not-Java and the NDK is the kit you need to connect Android/Java to JNI. The NDK is easy and
+with not-Java, and the NDK is the kit you need to connect Android/Java to JNI. The NDK is easy and
 straight-forward to download and install and there are no hidden surprises here.  Start with README.txt
 and nose around in /docs and see what you find.
 
@@ -27,13 +27,13 @@ C and C++ code and build the relevant .so files, even on WinXP.
 
 Another pleasant surpise is that the Gradle/NDK is very good at figuring out what to do,
 by default, without a lot of hand-holding.  This illustrates the ole convention-over-configuration
-principle.  So Gradle/NDK is able to find our source files and lots of header stuff
-and figure out what to do without whatever outputs it creates, without me having to micro-manage.
-Just sit back and enjoy a cold one while Skynet takes over.  No more futzing with cranky software.
+principle.  So Gradle/NDK is able to find our source files and headers and libraries
+ and all that stuff, and figure out what to do with whatever outputs it creates,
+ without me having to micro-manage. Just sit back and enjoy a /f/a/t/ cold one while [Skynet takes over](https://www.youtube.com/watch?v=_Wlsd9mljiU).  No more futzing with cranky software.
 
 But wait... there's more!
 
-Tips from Tom!
+##Tips from Tom!
 
 One of the things that really bedeviled me in figuring this out was getting the naming
  right for C and C++ functions.  For example, if you declare native String foo, in Java class
@@ -44,15 +44,14 @@ One of the things that really bedeviled me in figuring this out was getting the 
 
  Declare your native method first, in your Java source, and let the Android Studio tell you
  that it can't find the expected function definition.  When doing so, AS will tell you
- specifically what it's looking for!
+ specifically what it's looking for!  (Note: This seems to be a sporadically available "feature"
+ so YMMV.)
 
-Another thing... There's something odd going on with Android.mk and
- Application.mk.  When modifying them and rebuilding the project, I cannot detect
-   any effect.  I have therefore deleted them and everything still runs just fine.
-    However, there may be some is-it-really-getting-cleaned-and-properly-rebuilt
-    effect at work, that I have not yet determined.
+Another thing... Apparently, neither Android.mk nor Application.mk are used
+and thus we can just remove them.  Whatever they do, we can do with the experimental
+Gradle plugin.
 
-Finally, be sure to examine the extern "C" { JNIEXPORT ... JNICALL stuff in the
+Another things... Be sure to examine the extern "C" { JNIEXPORT ... JNICALL stuff in the
 cpp file.  We need it.  If it's not there, your Java cannot find the methods.
 
 
