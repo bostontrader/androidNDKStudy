@@ -1,13 +1,13 @@
 # How to get started with Android Studio, the Experimental Gradle plugin, the NDK, JNI, C, and C++
 
 The vast majority of Android development is done using Java.  However, there are times when
-we want to access "native" code from Java.  For example, maybe you have some C or C++ code
-that you want to access from your Java code.  Whether this is a good idea or not is a separate
+we want to access native code from Java.  For example, maybe you have some C or C++ code
+that you want to use.  Whether this is a good idea or not is a separate
 issue.  Assuming that you've c/o/n/s/u/l/t/e/d/ /y/o/u/r/ /8/-/b/a/l/l/ made your informed decision and have
 decided to do it, let me share some tips that I found useful.
 
-You'll be happy to know that doing this with Android Studio and Gradle is very feasible.
-As of the time of writing (Aug 2015), this apparently is a recent development and almost all other
+Overall, you'll be happy to know that doing this with Android Studio and Gradle is very feasible.
+As of the time of writing (Aug 2015), this apparently is a recent development and all other
 documentation that I have found was for doing this with Eclipse, the command line, or doing various
 contortions to make it work with Android Studio and Gradle.  Fortunately none of that's necessary.
 
@@ -17,21 +17,25 @@ You'll need to also study the [Java Native Interface (JNI)]
 (http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html) and the
 [Android Native Development Kit (NDK)](http://developer.android.com/ndk/guides/index.html).
 JNI is Java's spec for how Java should interact
-with not-Java, and the NDK is the kit you need to connect Android/Java to JNI. The NDK is easy and
+with not-Java, and the NDK is the kit you need to connect Android/Java to JNI. 
+
+The NDK is easy and
 straight-forward to download and install and there are no hidden surprises here.  Start with README.txt
-and nose around in /docs and see what you find.
+and nose around in /docs and see what you find. However, the docs and samples, as of ndk-r10e, are for Eclipse.  You can however import the samples into Android Studio and it will create suitable gradle.build files for you, using the experimental Gradle plugin.
 
 One pleasant surprise is that the NDK is fully equipped with its own build tools.  I haven't
 yet spelunked into the murky depths of this, but something in there can clearly compile
 C and C++ code and build the relevant .so files, even on WinXP.
 
-Another pleasant surpise is that the Gradle/NDK is very good at figuring out what to do,
+Another pleasant surpise is that the Gradle/NDK is fairly good at figuring out what to do,
 by default, without a lot of hand-holding.  This illustrates the ole convention-over-configuration
 principle.  So Gradle/NDK is able to find our source files and headers and libraries
  and all that stuff, and figure out what to do with whatever outputs it creates,
  without me having to micro-manage. Just sit back and enjoy a /f/a/t/ cold one while [Skynet takes over](https://www.youtube.com/watch?v=_Wlsd9mljiU).  No more futzing with cranky software.
 
-But wait... there's more!
+Unfortunately, there are some nettlesome mysteries still lurking therein.
+
+The biggest immediate problem that I found was that it's just not possible to debug the c/c++ code using the experimental Gradle Plugin and Android Studio.  Although promised soon, it ain't here yet.
 
 ##Tips from Tom!
 
