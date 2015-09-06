@@ -1,3 +1,97 @@
+How to debug c++ with Android's NDK.
+
+The purpose of my quest is to figure out how to debug c++ code that's part of
+an Android app that uses JNI/NDK.  I strongly desire that "debug" involve a graphical
+debugger.
+
+This goal has proven to be the Devil's work and I'm not done with it yet.  There are many
+random approaches to be found on the Internet, but unfortunately, none of them have yet to
+ work well for me. Nevertheless, I'm closing in on this so I'm
+organizing my notes into a sequential path of development in order to better clarify my
+understanding of this.  Hopefully these notes will get you going with this as well.
+
+The first thing to realize about this puzzle is that there's some complexity afoot that
+defies the lazy-man's "just read some recipes from the Internet" approach.  Although
+that method frequently "works" with lesser goals, it just doesn't work for me.  So, failing
+to get lucky, I've had to instead study the problem in greater depth.
+
+The overall puzzle is composed of two related parts:
+
+1. We need to build something that goes onto an Android device.
+
+2. We need a debugger to communicate with the code on the device.
+
+A 2 1/2 issue is that I for one would really like an easy-to-use graphical debugger.
+
+Sand is injected into the machinery of this process in that:
+
+1. You'll probably want the Android SDK and NDK.  Be sure to select the correct
+versions which work with all the other things coming soon.
+
+2. There are at least two main programming languages involved, Java and c++.  And more if you want to
+count shell scripting, c, Python, and Groovy.
+
+3. There are multiple build processes potentially at work.  Such as Gradle, Ant, ndk-build, and make.
+
+4. The build tools use lower level "tool chains" such as...
+
+5. There are at least two IDE's that invoke these build processes.  Android Studio and Eclipse.
+Three if you want to count Visual Studio.
+
+6. There are at least three operating systems possibly involved if you only count Android, Linux,
+and Windows.  Plenty more confusion if you peer more closely at the various variations of each
+or their twisted kinfolk such as Wine or Cygwin.
+
+7. All of the above can be found in many different versions, if you only count the publicly
+releases.  Heaven helps whoever gets their hands on some source code with the myriad of additional
+versions thus available.
+
+8. Nothing you find on the Internet is going to exactly match your particular circumstances.
+Can you make it stretch-to-fit?  Good luck with that!
+
+So if you just got lucky and some permutation of the above works for you, congratulations.  For the rest of you all, read on...
+
+1. Your development machine OS. The first step is to pick an OS to use on your development machine.
+I'm using Ubuntu 15.04, 64bit and Windows XP.
+
+
+1. Android SDK.  Make sure you have one.
+
+
+
+1. Start with Eclipse, the ADT, Linux, and gdb.  At the time of writing, the NDK documentation and samples
+all assume these things, so this is the easiest path to get started.
+
+2. Android Studio and the experimental Gradle plugin allegedly can do this. But I have been unable to find
+examples, documentation, or sufficient good-luck to stumble upon the answer.  There's a ferocious snake nest
+of complexity in this and before we jump to that level, I think it's wise to start with the basics.
+
+3. The Eclipse build process builds the Android app as usual. In doing so it incorporates some files created
+by the NDK.  It also invokes NDK_BUILD and builds the c++ bits.
+
+
+4. The basic drill is to invoke ndk-build whenever you see fit and then rebuild the Android app.  Sweet.
+
+5. Realize that ndk-build is a shell script.  If you examine the source code, you'll find clues about
+wtf it's doing, and what it might do if properly coaxed via command line args.  This trick is especially
+useful if the NDK tools are taunting you with mysterious error messages.
+
+ndk-build NDK_LOG=1 will start up the build and emit lots of logging messages.
+
+6. In order to get debugging going, our first task is to get ndk-debug to work.  This one was particularly
+obnoxious when I first went after it with my chainsaw.
+
+ndk generated files (app/src/main/libs)
+some particular face palms for me...
+
+1. Make sure to apply NDK Nature to the Eclipse project!
+
+2. There is some issue with ordinary users not being able to use the USB ports and this throws
+a monkey into the wrench re: using adb, which ndk-build uses.
+
+3. power!
+
+
 # How to get started with Android Studio, the Experimental Gradle plugin, the NDK, JNI, C, and C++
 
 The vast majority of Android development is done using Java.  However, there are times when
