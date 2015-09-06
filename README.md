@@ -1,61 +1,60 @@
-How to debug c++ with Android's NDK.
+#How to debug c++ with Android's NDK.
 
+##Introduction
 The purpose of my quest is to figure out how to debug c++ code that's part of
 an Android app that uses JNI/NDK.  I strongly desire that "debug" involve a graphical
 debugger.
 
 This goal has proven to be the Devil's work and I'm not done with it yet.  There are many
-random approaches to be found on the Internet, but unfortunately, none of them have yet to
- work well for me. Nevertheless, I'm closing in on this so I'm
+random approaches to be found on the Internet, but unfortunately, none of them have worked for me. Nevertheless, I'm closing in on this so I'm
 organizing my notes into a sequential path of development in order to better clarify my
 understanding of this.  Hopefully these notes will get you going with this as well.
 
+##Why is this hard?
 The first thing to realize about this puzzle is that there's some complexity afoot that
 defies the lazy-man's "just read some recipes from the Internet" approach.  Although
-that method frequently "works" with lesser goals, it just doesn't work for me.  So, failing
-to get lucky, I've had to instead study the problem in greater depth.
+said method frequently "works" with lesser goals, it has failed me here. So, failing
+that, I've had to instead study the problem in greater depth.
 
 The overall puzzle is composed of two related parts:
 
-1. We need to build something that goes onto an Android device.
+* We need to build something that goes onto an Android device.
 
-2. We need a debugger to communicate with the code on the device.
+* We need a debugger on a development machine to communicate with the code on the device.
 
-A 2 1/2 issue is that I for one would really like an easy-to-use graphical debugger.
+A second and a half issue is that I for one would really like an easy-to-use graphical debugger.
 
 Sand is injected into the machinery of this process in that:
 
-1. You'll probably want the Android SDK and NDK.  Be sure to select the correct
-versions which work with all the other things coming soon.
+* There are at least three operating systems plausibly involved if you only count Android, Linux, and Windows.  Plenty more confusion if you peer more closely at the various variations of each or their barefoot kinfolk such as Wine or Cygwin.
 
-2. There are at least two main programming languages involved, Java and c++.  And more if you want to
-count shell scripting, c, Python, and Groovy.
+* You'll want the Android SDK and NDK.
 
-3. There are multiple build processes potentially at work.  Such as Gradle, Ant, ndk-build, and make.
+* There are at least two main programming languages involved, Java and c++.  And more if you want to count shell scripting, c, Python, and Groovy.
 
-4. The build tools use lower level "tool chains" such as...
+* There are multiple build processes potentially at work.  Such as Gradle, Ant, to build the .apk
+and ndk-build and make to build the c++ binaries.
 
-5. There are at least two IDE's that invoke these build processes.  Android Studio and Eclipse.
-Three if you want to count Visual Studio.
+* The build tools use lower level tool chains.
 
-6. There are at least three operating systems possibly involved if you only count Android, Linux,
-and Windows.  Plenty more confusion if you peer more closely at the various variations of each
-or their twisted kinfolk such as Wine or Cygwin.
+* There are at least two IDE's that are commonly used to invoke these build processes, Android Studio and Eclipse. Three if you want to count Visual Studio.  You can also do this via command line.
 
-7. All of the above can be found in many different versions, if you only count the publicly
+* All of the above can be found in many different versions, if you only count the public 
 releases.  Heaven helps whoever gets their hands on some source code with the myriad of additional
 versions thus available.
 
-8. Nothing you find on the Internet is going to exactly match your particular circumstances.
-Can you make it stretch-to-fit?  Good luck with that!
+* Nothing you find on the Internet is going to _exactly_ match your particular circumstances. If not, is it close enough? Will you be able to adapt? Good luck with that!
 
 So if you just got lucky and some permutation of the above works for you, congratulations.  For the rest of you all, read on...
 
-1. Your development machine OS. The first step is to pick an OS to use on your development machine.
-I'm using Ubuntu 15.04, 64bit and Windows XP.
+##Digging deeper
 
+###Development machine OS
 
-1. Android SDK.  Make sure you have one.
+You will need to pick an OS to use on your development machine. For purposes of example I'm using 64-bit Ubuntu 15.04 and the lowly Windows XP (which is always 32 bit.)
+
+[Understanding the Android SDK](AndroidSDK.md)
+
 
 
 
