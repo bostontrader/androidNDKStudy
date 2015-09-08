@@ -53,7 +53,10 @@ So if you just got lucky and some permutation of the above works for you, congra
 
 You will need to pick an OS to use on your development machine. For purposes of example I'm using 64-bit Ubuntu 15.04 and the lowly Windows XP (which is always 32 bit.)
 
+###Install the Android SDK
 [Understanding the Android SDK](AndroidSDK.md)
+
+###Install the Android NDK
 
 
 
