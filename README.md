@@ -164,7 +164,7 @@ specifically what it's looking for!  (Note: This seems to be a sporadically avai
 so YMMV.)
 
 Another thing... By default, neither Android.mk nor Application.mk are used
-nd thus we can just remove them. But there's configuration option to let us use them
+and thus we can just remove them. But there's a configuration option to let us use them
 if we like. Whatever they do, we can do with the experimental Gradle plugin.
 
 Another things... Be sure to examine the extern "C" { JNIEXPORT ... JNICALL stuff in the
