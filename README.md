@@ -1,26 +1,54 @@
-#How to debug C++ with Android's NDK.
+#Getting Started with Android Studio, JNI, and the NDK.
+_and_
+
+##How to debug C++ with Android Studio.
 
 ##Introduction
-The purpose of my quest is to figure out how to debug C++ code that's part of
-an Android app that uses JNI.  I strongly desire that "debug" involve a graphical
-debugger.
+The purpose of my quest is to generally figure out how to work with Android Studio, JNI, and the NDK.  Getting going with samples was the easy part.  Unfortunately, getting a graphical debugger for C++ figured out was totally the Devil's work.  There are a lot of people screaming for answers on the Internet but the solution proved to be remarkably elusive.  This is the tale of my quest.
 
-The good news is that the overall process of building an Android app, using native code
-presently works fairly well.  For example, in my experience, Android Studio 1.3.2, the NDK r10e,
-and the experimental Gradle plugin all play nicely together.  RTFM and you're quickly good to go.
+##Good News! It's ALIVE!
+"Cut the crap Tom" you say?  "Just tell me how it works!"  Ok, here we go...
 
-The bad news is that connecting a debugger to the native code on the Android device
- has proven to be the Devil's work and I'm not done with it yet.  There are a myriad of
-random approaches to be found on the Internet, but unfortunately, none of them have worked for me.
-Nevertheless, I'm closing in on this so I'm organizing my notes into a sequential path of
-development in order to better clarify my understanding of this.  Hopefully these notes will get
-you going with this as well.
+* The overall process of building an Android app, using native code presently works fairly well.  For example, in my experience, Android Studio 1.3.2, the NDK r10e, and the experimental Gradle plugin all play nicely together, whether on Ubuntu 15.04, 64bit, or lowly WinXP. RTFM and you're quickly good to go.
+
+* The thousand things I tried before I figured this out shall not be agonized upon here.  See supra for my tales of woe.
+
+* The specific configuration that I have, that I can use to successfully set and stop at C++ breakpoints is Ubuntu 15.04, 64bit, Android Studio 1.3.2, NDK r10e, and a Nexus 6 emulator, x86, API 23.
+
+* You'll need to define a run-configuration of type "Android Native." The configuration is very simple and self-explanatory.  Accept the defaults, but be sure to set a module. Please notice the "native debugger" tab and that LLDB is the default.  I never could get this to work with GDB, but I don't care because LLDB is better.
+
+* You'll still need to define run-configuration for ordinary Java debugging.  In fact, you can only execute one or the other, at any time.  That is, do Java-only debugging, or C++-only debugging, but not both at the same time.
+
+* Unlike the ordinary "run" vs. "debug" distinction for other run-configuration, run and debug, for Android Native configurations, appear to do exactly the same thing.  So just running the configuration is sufficient to wake up the debugger.
+
+* When we run the configuration, after we select a suitable device, look for the "console" tab in the DebugNDK pane.  It may by default pop to the front, but if not, look for it.  The magic words you want to see are:
+
+"Now Launching Native Debug Session."
+
+Then after some modest delay, if all goes well, immediately after the above you'll see...
+
+* "Debugger attached to process nnnn."
+
+The first time I did this it took a minute or two for the debugger to attach.  Subsequently it does so in a handful of seconds.
+
+Wipe the sweat from your brow, you're getting real close to success!
+
+* When you execute the run-configuration, it's off to the races.  The application will just start going.  Meanwhile the debugger is taking its time connecting.  If execution passes any of your break points before the debugger is ready, then guess what happens?  That's right, the debugger won't stop on any of those breakpoints.
+
+So therefore...
+
+* You'll need to introduce some means of delay, such as sleep or a Button to click and trigger JNI action, so that the debugger will have time to connect _before_ execution reaches your break points.
+
+* Be especially careful in this when dealing with System.loadLibrary.  This is frequently done as a static initializer in a class, but can be done anywhere, such as inside your Button's onClick handler.
+
 
 ##Why is this hard?
-The first thing to realize about this puzzle is that there's some complexity afoot that
-defies the lazy-man's find-some-recipes-on-the-Internet approach.  Although
-said method frequently "works" with lesser goals, it has failed me here. So, failing
-that, I've had to instead study the problem in greater depth.
+
+Connecting a debugger to the native code on an Android device was a very difficult thing to do.
+There are a myriad of random approaches to be found on the Internet, most of which are outdated.  None of them have worked for me. Why was this hard to do?
+
+Maybe I'm just an idiot.  That would explain a lot.  But something to realize about this puzzle is that there's some complexity afoot that
+defies the lazy-man's find-some-recipes-on-the-Internet approach.  Although said method frequently "works" with lesser goals, it has failed me here. So, failing that, I've had to instead study the problem in greater depth.
 
 The overall puzzle is composed of two related parts:
 
@@ -32,17 +60,13 @@ A second and a half issue is that I for one would really like an easy-to-use gra
 
 Sand is injected into the machinery of this process in that:
 
-* There are at least three operating systems plausibly involved if you only count Android, Linux,
-and Windows. And there's plenty more confusion if you peer more closely at the various variations
-of each or their barefoot kinfolk such as Wine or Cygwin.
+* There are at least three operating systems plausibly involved if you only count Android, Linux, and Windows. And there's plenty more confusion if you peer more closely at the various variations of each and their barefoot kinfolk such as Wine or Cygwin.
 
 * You'll want the Android SDK and NDK.
 
-* There are at least two main programming languages involved, Java and C++.  And more if you want
-to count C, shell scripting, Python, and Groovy.
+* There are at least two main programming languages involved, Java and C++.  And more if you want to count C, shell scripting, Python, and Groovy.
 
-* There are multiple build processes potentially at work.  Such as Gradle and Ant, to build the .apk
-and ndk-build and make to build the C++ binaries.
+* There are multiple build processes potentially at work.  Such as Gradle and Ant, to build the .apk and ndk-build and make to build the C++ binaries.
 
 * The build tools use lower level tool chains.
 
@@ -55,8 +79,7 @@ releases. Heaven help whoever gets their hands on some source code with the myri
 versions thus available.
 
 * The debuggery only works with certain blessed combinations of versions and the actual
-functionality of all of the above changes significantly and rapidly.  This causes us to lose
-focus on the big picture and become mired in tedious little details.
+functionality of all of the above changes significantly and rapidly.  This causes us to lose focus on the big picture and become mired in tedious little details.
 
 * Nothing you find on the Internet is going to _exactly_ match your particular circumstances. If
 not, is it close enough? Will you be able to adapt? Good luck with that!
