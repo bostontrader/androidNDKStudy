@@ -12,7 +12,7 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">androidNDKStudy</h1>
-      <h2 class="project-tagline">A study re: how to make Android Studio, the experimental Gradle plugin, the NDK, JNI, and a mixture of Java, C, and C++, play nice and do tricks. </h2>
+      <h2 class="project-tagline">A study re: how to make Android Studio, the experimental Gradle plugin, the NDK, JNI, a mixture of Java, C, and C++, and the debugger all play nice and do tricks. </h2>
       <a href="https://github.com/bostontrader/androidNDKStudy" class="btn">View on GitHub</a>
       <a href="https://github.com/bostontrader/androidNDKStudy/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/bostontrader/androidNDKStudy/tarball/master" class="btn">Download .tar.gz</a>
@@ -20,16 +20,163 @@
 
     <section class="main-content">
       <h1>
-<a id="how-to-get-started-with-android-studio-the-experimental-gradle-plugin-the-ndk-jni-c-and-c" class="anchor" href="#how-to-get-started-with-android-studio-the-experimental-gradle-plugin-the-ndk-jni-c-and-c" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to get started with Android Studio, the Experimental Gradle plugin, the NDK, JNI, C, and C++</h1>
+<a id="getting-started-with-android-studio-jni-and-the-ndk" class="anchor" href="#getting-started-with-android-studio-jni-and-the-ndk" aria-hidden="true"><span class="octicon octicon-link"></span></a>Getting Started with Android Studio, JNI, and the NDK.</h1>
+
+<p><em>and</em></p>
+
+<h2>
+<a id="how-to-debug-c-with-android-studio" class="anchor" href="#how-to-debug-c-with-android-studio" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to debug C++ with Android Studio.</h2>
+
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>The purpose of my quest is to generally figure out how to work with Android Studio, JNI, and the NDK.  Getting going with samples was the easy part.  Unfortunately, getting a graphical debugger for C++ figured out was totally the Devil's work.  There are a lot of people screaming for answers on the Internet but the solution proved to be remarkably elusive.  This is the tale of my quest.</p>
+
+<h2>
+<a id="good-news-its-alive" class="anchor" href="#good-news-its-alive" aria-hidden="true"><span class="octicon octicon-link"></span></a>Good News! It's ALIVE!</h2>
+
+<p>"Cut the crap Tom" you say?  "Just tell me how it works!"  Ok, here we go...</p>
+
+<ul>
+<li><p>The overall process of building an Android app, using native code presently works fairly well.  For example, in my experience, Android Studio 1.3.2, the NDK r10e, and the experimental Gradle plugin all play nicely together, whether on Ubuntu 15.04, 64bit, or lowly WinXP. RTFM and you're quickly good to go.</p></li>
+<li><p>The thousand things I tried before I figured this out shall not be agonized upon here.  See supra for my tales of woe.</p></li>
+<li><p>The specific configuration that I have, that I can use to successfully set and stop at C++ breakpoints is Ubuntu 15.04, 64bit, Android Studio 1.3.2, NDK r10e, and a Nexus 6 emulator, x86, API 23.</p></li>
+<li><p>You'll need to define a run-configuration of type "Android Native." The configuration is very simple and self-explanatory.  Accept the defaults, but be sure to set a module. Please notice the "native debugger" tab and that LLDB is the default.  I never could get this to work with GDB, but I don't care because LLDB is better.</p></li>
+<li><p>You'll still need to define run-configuration for ordinary Java debugging.  In fact, you can only execute one or the other, at any time.  That is, do Java-only debugging, or C++-only debugging, but not both at the same time.</p></li>
+<li><p>Unlike the ordinary "run" vs. "debug" distinction for other run-configuration, run and debug, for Android Native configurations, appear to do exactly the same thing.  So just running the configuration is sufficient to wake up the debugger.</p></li>
+<li><p>When we run the configuration, after we select a suitable device, look for the "console" tab in the DebugNDK pane.  It may by default pop to the front, but if not, look for it.  The magic words you want to see are:</p></li>
+</ul>
+
+<p>"Now Launching Native Debug Session."</p>
+
+<p>Then after some modest delay, if all goes well, immediately after the above you'll see...</p>
+
+<ul>
+<li>"Debugger attached to process nnnn."</li>
+</ul>
+
+<p>The first time I did this it took a minute or two for the debugger to attach.  Subsequently it does so in a handful of seconds.</p>
+
+<p>Wipe the sweat from your brow, you're getting real close to success!</p>
+
+<ul>
+<li>When you execute the run-configuration, it's off to the races.  The application will just start going.  Meanwhile the debugger is taking its time connecting.  If execution passes any of your break points before the debugger is ready, then guess what happens?  That's right, the debugger won't stop on any of those breakpoints.</li>
+</ul>
+
+<p>So therefore...</p>
+
+<ul>
+<li><p>You'll need to introduce some means of delay, such as sleep or a Button to click and trigger JNI action, so that the debugger will have time to connect <em>before</em> execution reaches your break points.</p></li>
+<li><p>Be especially careful in this when dealing with System.loadLibrary.  This is frequently done as a static initializer in a class, but can be done anywhere, such as inside your Button's onClick handler.</p></li>
+</ul>
+
+<h2>
+<a id="why-is-this-hard" class="anchor" href="#why-is-this-hard" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why is this hard?</h2>
+
+<p>Connecting a debugger to the native code on an Android device was a very difficult thing to do.
+There are a myriad of random approaches to be found on the Internet, most of which are outdated.  None of them have worked for me. Why was this hard to do?</p>
+
+<p>Maybe I'm just an idiot.  That would explain a lot.  But something to realize about this puzzle is that there's some complexity afoot that
+defies the lazy-man's find-some-recipes-on-the-Internet approach.  Although said method frequently "works" with lesser goals, it has failed me here. So, failing that, I've had to instead study the problem in greater depth.</p>
+
+<p>The overall puzzle is composed of two related parts:</p>
+
+<ul>
+<li><p>We need to build something that goes onto an Android device.</p></li>
+<li><p>We need a debugger on a development machine to communicate with the executing code on the device.</p></li>
+</ul>
+
+<p>A second and a half issue is that I for one would really like an easy-to-use graphical debugger.</p>
+
+<p>Sand is injected into the machinery of this process in that:</p>
+
+<ul>
+<li><p>There are at least three operating systems plausibly involved if you only count Android, Linux, and Windows. And there's plenty more confusion if you peer more closely at the various variations of each and their barefoot kinfolk such as Wine or Cygwin.</p></li>
+<li><p>You'll want the Android SDK and NDK.</p></li>
+<li><p>There are at least two main programming languages involved, Java and C++.  And more if you want to count C, shell scripting, Python, and Groovy.</p></li>
+<li><p>There are multiple build processes potentially at work.  Such as Gradle and Ant, to build the .apk and ndk-build and make to build the C++ binaries.</p></li>
+<li><p>The build tools use lower level tool chains.</p></li>
+<li><p>There are at least two IDE's that are commonly used to invoke these build processes, Android
+Studio and Eclipse. Three if you want to count Visual Studio.  You can also do this via command
+line.</p></li>
+<li><p>All of the above can be found in many different versions, if you only count the public 
+releases. Heaven help whoever gets their hands on some source code with the myriad of additional
+versions thus available.</p></li>
+<li><p>The debuggery only works with certain blessed combinations of versions and the actual
+functionality of all of the above changes significantly and rapidly.  This causes us to lose focus on the big picture and become mired in tedious little details.</p></li>
+<li><p>Nothing you find on the Internet is going to <em>exactly</em> match your particular circumstances. If
+not, is it close enough? Will you be able to adapt? Good luck with that!</p></li>
+</ul>
+
+<p>So if you just got lucky and some permutation of the above works for you, congratulations! For the
+rest of you, read on...</p>
+
+<h2>
+<a id="digging-deeper" class="anchor" href="#digging-deeper" aria-hidden="true"><span class="octicon octicon-link"></span></a>Digging deeper</h2>
+
+<h3>
+<a id="development-machine-os" class="anchor" href="#development-machine-os" aria-hidden="true"><span class="octicon octicon-link"></span></a>Development machine OS</h3>
+
+<p>You will need to pick an OS to use on your development machine. For purposes of example I'm using
+64-bit Ubuntu 15.04 and the lowly Windows XP (which is always 32 bit.)</p>
+
+<h3>
+<a id="install-the-android-sdk" class="anchor" href="#install-the-android-sdk" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install the Android SDK</h3>
+
+<p><a href="AndroidSDK.md">Understanding the Android SDK</a></p>
+
+<h3>
+<a id="install-the-android-ndk" class="anchor" href="#install-the-android-ndk" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install the Android NDK</h3>
+
+<p>I have NDK r10e on the Windows XP machines and r8e on Ubuntu.</p>
+
+<h3>
+<a id="eclipse" class="anchor" href="#eclipse" aria-hidden="true"><span class="octicon octicon-link"></span></a>Eclipse</h3>
+
+<p>Start with Eclipse, the CDT, the ADT, Linux, and gdb.  At the time of writing, the NDK documentation
+and samples all assume these things, so this is the easiest path to get started.  I'm using Eclipse
+Mars on the Ubuntu machine.</p>
+
+<p>Android Studio and the experimental Gradle plugin allegedly can do this. And it does, if you don't
+mind omitting debuggin.  But I have been unable to find examples, documentation, or sufficient
+good-luck to stumble upon the answer.  There's a ferocious snake nest of complexity in this and
+before we jump to that level, I think it's wise to start with the basics.</p>
+
+<p>Unfortunately, Eclipse is, IMHO, not aging gracefully.  I've been able to get the above combo
+to stop on breakpoints in C, C++, and JNI_OnLoad (a previously elusive target) using the graphical
+debugger.  But getting there involved dealing with a mountain mysterious problems, of which many
+are merely in remission even now.</p>
+
+<p>The Eclipse build process builds the Android app as usual. In doing so it incorporates some files
+created by the NDK.  It also invokes NDK_BUILD and builds the C++ bits.</p>
+
+<p>Some documentation suggests that you invoke ndk-build from the command-line whenever you see fit
+and then rebuild the Android app.  My experience has been that this is unnecessary because Eclipse
+does that already.  My experience has also been the Eclipse build is haunted.  Sometimes it seems
+to build and sometimes not.</p>
+
+<p>Realize that ndk-build is a shell script.  If you examine the source code, you'll find clues about
+wtf it's doing, and what it might do if properly coaxed via command line args.  This trick is
+especially useful if the NDK tools are taunting you with mysterious error messages.</p>
+
+<p>ndk-build NDK_LOG=1 will start up the build and emit lots of logging messages.</p>
+
+<p>Make sure to apply NDK Nature to the Eclipse project!</p>
+
+<p>There is some issue with ordinary users not being able to use the USB ports and this throws
+a monkey into the wrench re: using adb, which ndk-build uses.  Search for "udev" for more info.</p>
+
+<h2>
+<a id="how-to-get-started-with-android-studio-the-experimental-gradle-plugin-the-ndk-jni-c-and-c" class="anchor" href="#how-to-get-started-with-android-studio-the-experimental-gradle-plugin-the-ndk-jni-c-and-c" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to get started with Android Studio, the Experimental Gradle plugin, the NDK, JNI, C, and C++</h2>
 
 <p>The vast majority of Android development is done using Java.  However, there are times when
-we want to access "native" code from Java.  For example, maybe you have some C or C++ code
-that you want to access from your Java code.  Whether this is a good idea or not is a separate
-issue.  Assuming that you've c/o/n/s/u/l/t/e/d/ /y/o/u/r/ /8/-/b/a/l/l/ made your informed decision and have
-decided to do it, let me share some tips that I found useful.</p>
+we want to access native code from Java.  For example, maybe you have some C or C++ code
+that you want to use.  Whether this is a good idea or not is a separate
+issue.  Assuming that you've c/o/n/s/u/l/t/e/d/ /y/o/u/r/ /8/-/b/a/l/l/ made your informed decision
+and have decided to do it, let me share some tips that I found useful.</p>
 
-<p>You'll be happy to know that doing this with Android Studio and Gradle is very feasible.
-As of the time of writing (Aug 2015), this apparently is a recent development and almost all other
+<p>Overall, you'll be happy to know that doing this with Android Studio and Gradle is very feasible.
+As of the time of writing (Aug 2015), this apparently is a recent development and all other
 documentation that I have found was for doing this with Eclipse, the command line, or doing various
 contortions to make it work with Android Studio and Gradle.  Fortunately none of that's necessary.</p>
 
@@ -37,40 +184,43 @@ contortions to make it work with Android Studio and Gradle.  Fortunately none of
 You'll need to also study the <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/jni/spec/jniTOC.html">Java Native Interface (JNI)</a> and the
 <a href="http://developer.android.com/ndk/guides/index.html">Android Native Development Kit (NDK)</a>.
 JNI is Java's spec for how Java should interact
-with not-Java, and the NDK is the kit you need to connect Android/Java to JNI. The NDK is easy and
-straight-forward to download and install and there are no hidden surprises here.  Start with README.txt
-and nose around in /docs and see what you find.</p>
+with not-Java, and the NDK is the kit you need to connect Android/Java to JNI. </p>
 
-<p>One pleasant surprise is that the NDK is fully equipped with its own build tools.  I haven't
-yet spelunked into the murky depths of this, but something in there can clearly compile
-C and C++ code and build the relevant .so files, even on WinXP.</p>
+<p>The NDK is easy and straight-forward to download and install and there are no hidden surprises here.
+Start with README.txt and nose around in /docs and see what you find. However, the docs and samples,
+as of ndk-r10e, are still for Eclipse and the ADT.  You can however import the samples into Android
+ Studio and it will create suitable gradle.build files for you, using the experimental Gradle plugin.</p>
 
-<p>Another pleasant surpise is that the Gradle/NDK is very good at figuring out what to do,
+<p>One pleasant surprise is that the Gradle/NDK plugin is fairly good at figuring out what to do,
 by default, without a lot of hand-holding.  This illustrates the ole convention-over-configuration
 principle.  So Gradle/NDK is able to find our source files and headers and libraries
  and all that stuff, and figure out what to do with whatever outputs it creates,
- without me having to micro-manage. Just sit back and enjoy a /f/a/t/ cold one while <a href="https://www.youtube.com/watch?v=_Wlsd9mljiU">Skynet takes over</a>.  No more futzing with cranky software.</p>
+ without me having to micro-manage. Just sit back and enjoy a /f/a/t/ cold one
+ while <a href="https://www.youtube.com/watch?v=_Wlsd9mljiU">Skynet takes over</a>.  No more futzing with cranky software!</p>
 
-<p>But wait... there's more!</p>
+<p>Unfortunately, there are some nettlesome mysteries still lurking therein.</p>
+
+<p>The biggest immediate problem that I found was that it's just not possible to debug the C/C++ code
+using the experimental Gradle Plugin and Android Studio.  Although promised soon, it ain't here yet.</p>
 
 <h2>
 <a id="tips-from-tom" class="anchor" href="#tips-from-tom" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tips from Tom!</h2>
 
 <p>One of the things that really bedeviled me in figuring this out was getting the naming
- right for C and C++ functions.  For example, if you declare native String foo, in Java class
- Bar, you will need a suitably named function <em>somewhere</em> in your collection of C/C++ source files.
- The tedious rules for what exactly to name this include the Java package and class name of
- the Java doing the calling.  This in and of itself is not so difficult.  The problem is if
- you don't get this right, the exception messages are not helpful.  So the tip is...</p>
+right for C and C++ functions.  For example, if you declare native String foo, in Java class
+Bar, you will need a suitably named function <em>somewhere</em> in your collection of C/C++ source files.
+The tedious rules for what exactly to name this include the Java package and class name of
+the Java doing the calling.  This in and of itself is not so difficult.  The problem is if
+you don't get this right, the exception messages are not helpful.  So the tip is...</p>
 
 <p>Declare your native method first, in your Java source, and let the Android Studio tell you
- that it can't find the expected function definition.  When doing so, AS will tell you
- specifically what it's looking for!  (Note: This seems to be a sporadically available "feature"
- so YMMV.)</p>
+that it can't find the expected function definition.  When doing so, AS will tell you
+specifically what it's looking for!  (Note: This seems to be a sporadically available "feature"
+so YMMV.)</p>
 
-<p>Another thing... Apparently, neither Android.mk nor Application.mk are used
-and thus we can just remove them.  Whatever they do, we can do with the experimental
-Gradle plugin.</p>
+<p>Another thing... By default, neither Android.mk nor Application.mk are used
+and thus we can just remove them. But there's a configuration option to let us use them
+if we like. Whatever they do, we can do with the experimental Gradle plugin.</p>
 
 <p>Another things... Be sure to examine the extern "C" { JNIEXPORT ... JNICALL stuff in the
 cpp file.  We need it.  If it's not there, your Java cannot find the methods.</p>
